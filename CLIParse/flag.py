@@ -3,12 +3,13 @@ Contains Flag class
 """
 
 class Flag:
-    def __init__(self, name, short = None, long = None, type = None, help = ""):
+    def __init__(self, name, short = None, long = None, type = None, help = "", default = None):
         self._name = name
         self._short = short
         self._long = long
         self._type = type
         self._help = help
+        self._default = default
     
     def parse(self, text):
         if self._type:

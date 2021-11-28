@@ -4,7 +4,7 @@ Contains Parse class
 
 
 from .flag import Flag
-from .command import Command
+from .command import Command, FlagError
 from .flags import Flags
 import sys
 import os
@@ -13,7 +13,7 @@ class ArgumentError(Exception):
     pass
 
 class Parse:
-    def __init__(self, name = __file__, before = None, after = None):
+    def __init__(self, name = sys.argv[0], before = None, after = None):
         self.name = name
         self.before_text = before
         self.after_text = after
@@ -28,9 +28,9 @@ class Parse:
     def flag(self, *args, **kwargs):
         self.flags.append(Flag(*args, **kwargs))
     
-    def command(self, commandname = ""):
+    def command(self, commandname = "", required = []):
         def decorator_command(function):
-            self.commands.append(Command(commandname, function, args = function.__code__.co_varnames, help = function.__doc__))
+            self.commands.append(Command(commandname, function, args = function.__code__.co_varnames, help = function.__doc__, required = required))
         return decorator_command
     
     def _getLongestFlag(self):
@@ -150,14 +150,14 @@ class Parse:
             else:
                 print(indent, f"{name}")
                 
-            if len(self.commands) > 0:
+            if self._getNamedCommands() > 0:
                 print("Commands:")
                 for command in self.commands:
-                    print(command.pretty(indent = 4, longest_command = self._getLongest(), screen_width = self._getScreenWidth()))
+                    print(command.pretty(indent = 4, longest_command = self._getLongest(), screen_width = self._getScreenWidth()).rstrip().rstrip("|").rstrip())
             if len(self.flags) > 0:
                 print("Flags:")
                 for flag in self.flags:
-                    print(flag.pretty(indent = 4, longest_long = self._getLongest(), screen_width = self._getScreenWidth()))
+                    print(flag.pretty(indent = 4, longest_long = self._getLongest(), screen_width = self._getScreenWidth()).rstrip().rstrip("|").rstrip())
         
         if self.after_text:
             print("\n" + (" "*4).join(self._splitOnLongLine(self.after_text, self._getScreenWidth())))
@@ -272,7 +272,10 @@ class Parse:
             args = sys.argv[1:]
 
         for flag in self.flags:
-            self.rflags[flag._name] = None
+            if flag._default:
+                self.rflags[flag._name] = flag._default
+            else:
+                self.rflags[flag._name] = None
 
         if len(args) == 0:
             self._help()
@@ -280,11 +283,19 @@ class Parse:
         for pos, arg in enumerate(args):
             self.handleArg(pos, args)
 
-        if self.ccommand != "":
-            if self.ccommand in self._getCommands():
+        if self.inArg:
+            if len(self.inArgName) > 1:
+                print(f"Flag --{self.inArgName} is not a toggle")
+            else:
+                print(f"Flag -{self.inArgName} is not a toggle")
+            self._help()
+
+        if self.ccommand in self._getCommands():
+            try:
                 self._getCommand(self.ccommand).run(Flags(self.rflags), *self.pargs)
-
-
-        
-        
-        
+            except FlagError as e:
+                print(e)
+                self._help()
+        else:
+            print("Specify a subcommand")
+            self._help()

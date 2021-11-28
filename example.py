@@ -8,7 +8,8 @@ class Color:
         self.g = color[2] + color[3]
         self.b = color[4] + color[5]
 
-p.flag("color", short = "c", long = "color", help = "Specify color to use", type = Color) # example for specifiying color
+p.flag("color", short = "c", long = "color", help = "Specify color to use", type = Color) # example for specifying color
+p.flag("color2", short = "C", long = "color2", help = "Specify a second color to use", type = Color, default = Color("f0f0f0")) # example for specifying default argument
 
 
 @p.command("CommandName")
@@ -21,12 +22,10 @@ def grab_all(flags, *args):
     "Grabs all arguments"
     pass
 
-@p.command("printColor")
+@p.command("printColor", required = [ "color" ])
 def printColor(flags):
     "Prints Color given with --color"
-    if flags.color:
-        print(flags.color.r, flags.color.g, flags.color.b)
-    else:
-        print("Need a color to print!")
+    print(flags.color.r, flags.color.g, flags.color.b)
+    print(flags.color2.r, flags.color2.g, flags.color2.b)
 
 p.run()

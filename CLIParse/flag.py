@@ -41,6 +41,6 @@ class Flag:
         if self._short and self._long:
             return f"\n{' '*indent}".join(self._splitOnLongLine(f"{' ' * indent}-{self._short} --{self._long}{' ' * (longest_long - len(self._long))} | {self._help}".replace("\n", f"\n{' '*indent}"), screen_width))
         elif self._short:
-            return f"\n{' '*indent}".join(self._splitOnLongLine(f"{' ' * indent}-{self._short}{' ' * (longest_long+1)} | {self._help}".replace("\n", f"\n{' '*indent}"), screen_width))
+            return f"\n{' '*indent}".join(self._splitOnLongLine(f"{' ' * indent}-{self._short}{' ' * (longest_long+3)} | {self._help}".replace("\n", f"\n{' '*indent}"), screen_width))
         elif self._long:
             return f"\n{' '*indent}".join(self._splitOnLongLine(f"{' ' * indent}    --{self._long}{' ' * (longest_long - len(self._long))} | {self._help}".replace("\n", f"\n{' '*indent}"), screen_width))

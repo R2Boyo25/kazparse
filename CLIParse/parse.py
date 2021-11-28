@@ -36,8 +36,9 @@ class Parse:
     def _getLongestFlag(self):
         longest = 0
         for flag in self.flags:
-            if len(flag._long) > longest:
-                longest = len(flag._long)
+            if flag._long:
+                if len(flag._long) > longest:
+                    longest = len(flag._long)
         
         return longest
     
@@ -202,8 +203,12 @@ class Parse:
                         self.inArg = True
                         self.inArgName = flag
                     else:
-                        if "=" in arg or args[pos+1].startswith("="):
-                            raise ArgumentError(f"Flag --{flag} is a toggle")
+                        if pos == len(args)-1:
+                            if "=" in arg:
+                                raise ArgumentError(f"Flag --{flag} is a toggle")
+                        else:
+                            if "=" in arg or args[pos+1].startswith("="):
+                                raise ArgumentError(f"Flag --{flag} is a toggle")
                         self.rflags[self._getFlag(flag)._name] = True
             elif arg.startswith("-"):
                 arg = arg.lstrip("-")
@@ -238,8 +243,12 @@ class Parse:
                         self.inArg = True
                         self.inArgName = flag
                     else:
-                        if "=" in arg or args[pos+1].startswith("="):
-                            raise ArgumentError(f"Flag --{flag} is a toggle")
+                        if pos == len(args)-1:
+                            if "=" in arg:
+                                raise ArgumentError(f"Flag --{flag} is a toggle")
+                        else:
+                            if "=" in arg or args[pos+1].startswith("="):
+                                raise ArgumentError(f"Flag --{flag} is a toggle")
                         self.rflags[self._getFlag(flag)._name] = True
             else:
                 if not self.inArg:

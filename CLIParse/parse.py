@@ -147,6 +147,8 @@ class Parse:
                 print(indent, f"{name} [-{self._cluster()}] [command]")
             elif self._numOfLongArgs() > 0:
                 print(indent, f"{name} {' '.join(self._prettyLongArgs())}")
+            elif self._getNamedCommands() > 0:
+                print(indent, f"{name} [command]")
             else:
                 print(indent, f"{name}")
                 

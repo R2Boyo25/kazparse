@@ -269,7 +269,7 @@ class Parse:
             print(e)
             self._help()
 
-    def run(self, args = None):
+    def run(self, args = None, extras = None):
         if not args:
             args = sys.argv[1:]
 
@@ -282,7 +282,8 @@ class Parse:
         if len(args) == 0:
             self._help()
         
-        for pos, arg in enumerate(args):
+        for obj in enumerate(args):
+            pos = obj[0]
             self.handleArg(pos, args)
 
         if self.inArg:
@@ -294,7 +295,10 @@ class Parse:
 
         if self.ccommand in self._getCommands():
             try:
-                self._getCommand(self.ccommand).run(Flags(self.rflags), *self.pargs)
+                if extras:
+                    self._getCommand(self.ccommand).run(Flags(self.rflags), extras, *self.pargs)
+                else:
+                    self._getCommand(self.ccommand).run(Flags(self.rflags), *self.pargs)
             except FlagError as e:
                 print(e)
                 self._help()

@@ -28,9 +28,9 @@ class Parse:
     def flag(self, *args, **kwargs):
         self.flags.append(Flag(*args, **kwargs))
     
-    def command(self, commandname = "", required = []):
+    def command(self, commandname = "", required = [], hidden = False):
         def decorator_command(function):
-            self.commands.append(Command(commandname, function, args = function.__code__.co_varnames, help = function.__doc__, required = required))
+            self.commands.append(Command(commandname, function, args = function.__code__.co_varnames, help = function.__doc__, required = required, hidden = hidden))
         return decorator_command
     
     def _getLongestFlag(self):
@@ -102,7 +102,7 @@ class Parse:
     def _getNamedCommands(self):
         out = 0
         for command in self.commands:
-            if command._name != "":
+            if command._name != "" and not command.hidden:
                 out += 1
         return out
 
@@ -155,7 +155,8 @@ class Parse:
             if self._getNamedCommands() > 0:
                 print("Commands:")
                 for command in self.commands:
-                    print(command.pretty(indent = 4, longest_command = self._getLongest(), screen_width = self._getScreenWidth()).rstrip().rstrip("|").rstrip())
+                    if not command.hidden:
+                        print(command.pretty(indent = 4, longest_command = self._getLongest(), screen_width = self._getScreenWidth()).rstrip().rstrip("|").rstrip())
             if len(self.flags) > 0:
                 print("Flags:")
                 for flag in self.flags:

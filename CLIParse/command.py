@@ -6,12 +6,13 @@ class FlagError(Exception):
     pass
 
 class Command:
-    def __init__(self, name, func, args = [], help = "", required = []):
+    def __init__(self, name, func, args = [], help = "", required = [], hidden = False):
         self._name = name
         self._func = func
         self._help = help.strip('\n').strip() if help else ""
         self._args = args
         self._required = required
+        self.hidden = hidden
 
     def _splitOnLongLine(self, text, length):
         out = []

@@ -16,7 +16,7 @@ class ArgumentError(Exception):
 def checkexc():
     tb = sys.exc_info()[-1]
 
-    return tb.tb_lineno == 308 # will break on any change to the number of lines in this file
+    return tb.tb_lineno in [313, 315] # will break on any change to the number of lines in this file
 
 class Parse:
     def __init__(self, name = sys.argv[0], before = None, after = None):

@@ -12,7 +12,7 @@ def printArgs(flags, *args):
     print(flags, *args)
 
 @p.command()
-def defaultCommand(flags, *args):
+def defaultCommand(flags):
     print(flags, *args)
-    
+
 p.run()

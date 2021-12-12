@@ -11,4 +11,8 @@ def printArgs(flags, *args):
     "Print arguments"
     print(flags, *args)
 
+@p.command()
+def defaultCommand(flags, *args):
+    print(flags, *args)
+    
 p.run()

@@ -23,6 +23,7 @@ class Parse:
         self.inArg = False
         self.inArgName = ""
         self.ccommand = ""
+        self.gotcommand = False
         self.pargs = []
 
     def flag(self, *args, **kwargs):
@@ -255,13 +256,19 @@ class Parse:
                         self.rflags[self._getFlag(flag)._name] = True
             else:
                 if not self.inArg:
-                    if self.ccommand != "":
+                    if self.gotcommand:
                         self.pargs.append(arg)
                     else:
                         if arg in self._getCommands():
                             self.ccommand = arg
+                            self.gotcommand = True
                         else:
-                            raise ArgumentError(f"Invalid command {arg}")
+                            print(self._getCommands())
+                            if not ("" in self._getCommands()):
+                                raise ArgumentError(f"Invalid command {arg}")
+                            else:
+                                self.pargs.append(arg)
+                                self.gotcommand = True
                 else:
                     if arg.strip() != "=":
                         self.inArg = False
@@ -280,7 +287,7 @@ class Parse:
             else:
                 self.rflags[flag._name] = None
 
-        if len(args) == 0:
+        if len(args) == 0 and (not "" in self._getCommands()):
             self._help()
         
         for obj in enumerate(args):

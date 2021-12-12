@@ -316,12 +316,12 @@ class Parse:
             except FlagError as e:
                 print(e)
                 self._help()
-            except TypeError as e:
-                if checkexc():
-                    print(f"Command {self.ccommand} missing required argument(s) {str(e).split('required positional argument:')[-1].split('required positional arguments:')[-1].strip()}")
-                    self._help()
-                else:
-                    raise e # For any devs that see this from their program, sorry, have to do this for handling missing non-optional arguments
+            #except TypeError as e:
+            #    if checkexc():
+            #        print(f"Command {self.ccommand} missing required argument(s) {str(e).split('required positional argument:')[-1].split('required positional arguments:')[-1].strip()}")
+            #        self._help()
+            #    else:
+            #        raise e # For any devs that see this from their program, sorry, have to do this for handling missing non-optional arguments
         else:
             print("Specify a subcommand")
             self._help()

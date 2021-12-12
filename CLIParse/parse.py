@@ -8,9 +8,15 @@ from .command import Command, FlagError
 from .flags import Flags
 import sys
 import os
+import traceback
 
 class ArgumentError(Exception):
     pass
+
+def checkexc():
+    tb = sys.exc_info()[-1]
+
+    return tb.tb_lineno == 308 # will break on any change to the number of lines in this file
 
 class Parse:
     def __init__(self, name = sys.argv[0], before = None, after = None):
@@ -310,6 +316,12 @@ class Parse:
             except FlagError as e:
                 print(e)
                 self._help()
+            except TypeError as e:
+                if checkexc():
+                    print(f"Command {self.ccommand} missing required argument(s) {str(e).split('required positional argument:')[-1].split('required positional arguments:')[-1].strip()}")
+                    self._help()
+                else:
+                    raise e # For any devs that see this from their program, sorry, have to do this for handling missing non-optional arguments
         else:
             print("Specify a subcommand")
             self._help()

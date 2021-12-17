@@ -269,7 +269,6 @@ class Parse:
                             self.ccommand = arg
                             self.gotcommand = True
                         else:
-                            print(self._getCommands())
                             if not ("" in self._getCommands()):
                                 raise ArgumentError(f"Invalid command {arg}")
                             else:

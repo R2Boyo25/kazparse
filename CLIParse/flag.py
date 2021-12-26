@@ -25,14 +25,20 @@ class Flag:
         elif self._long:
             return f"--{self._long} {self._help}"
     
-    def _splitOnLongLine(self, text, length):
-        out = []
-        buf = []
+    def _splitOnLongLine(self, text, length, indent):
+        out         = []
+        buf         = []
+        length     -= 2
+        totalindent = 0
+        totalchars  = 0
+
         for pos, char in enumerate(text):
             buf.append(char)
-            if pos > length:
+            if pos - totalchars > (length) - totalindent:
                 out.append("".join(buf))
+                totalchars += len(buf)
                 buf = []
+                totalindent += indent
 
         out.append("".join(buf))
         return out
@@ -40,8 +46,8 @@ class Flag:
     def pretty(self, indent = 8, longest_long = 2, screen_width = 10):
         longest_long = longest_long - 5
         if self._short and self._long:
-            return f"\n{' '*indent}".join(self._splitOnLongLine(f"{' ' * indent}-{self._short} --{self._long}{' ' * (longest_long - len(self._long))} | {self._help}".replace("\n", f"\n{' '*indent}"), screen_width))
+            return f"\n{' '*indent}".join(self._splitOnLongLine(f"{' ' * indent}-{self._short} --{self._long}{' ' * (longest_long - len(self._long))} | {self._help}".replace("\n", f"\n{' '*indent}"), screen_width, indent))
         elif self._short:
-            return f"\n{' '*indent}".join(self._splitOnLongLine(f"{' ' * indent}-{self._short}{' ' * (longest_long+3)} | {self._help}".replace("\n", f"\n{' '*indent}"), screen_width))
+            return f"\n{' '*indent}".join(self._splitOnLongLine(f"{' ' * indent}-{self._short}{' ' * (longest_long+3)} | {self._help}".replace("\n", f"\n{' '*indent}"), screen_width, indent))
         elif self._long:
-            return f"\n{' '*indent}".join(self._splitOnLongLine(f"{' ' * indent}   --{self._long}{' ' * (longest_long - len(self._long))} | {self._help}".replace("\n", f"\n{' '*indent}"), screen_width))
+            return f"\n{' '*indent}".join(self._splitOnLongLine(f"{' ' * indent}   --{self._long}{' ' * (longest_long - len(self._long))} | {self._help}".replace("\n", f"\n{' '*indent}"), screen_width, indent))

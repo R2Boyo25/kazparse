@@ -14,20 +14,26 @@ class Command:
         self._required = required
         self.hidden = hidden
 
-    def _splitOnLongLine(self, text, length):
-        out = []
-        buf = []
+    def _splitOnLongLine(self, text, length, indent):
+        out         = []
+        buf         = []
+        length     -= 2
+        totalindent = 0
+        totalchars  = 0
+
         for pos, char in enumerate(text):
             buf.append(char)
-            if pos > length:
+            if pos - totalchars > length - totalindent:
                 out.append("".join(buf))
+                totalchars += len(buf)
                 buf = []
+                totalindent += indent
 
         out.append("".join(buf))
         return out
 
     def pretty(self, indent = 8, longest_command = 2, screen_width = 10):
-        return f"\n{' '*indent}".join(self._splitOnLongLine(f"{' ' * indent}{self._name}{' ' * (longest_command - len(self._name))} | {self._help}", screen_width))
+        return f"\n{' '*indent}".join(self._splitOnLongLine(f"{' ' * indent}{self._name}{' ' * (longest_command - len(self._name))} | {self._help}", screen_width, indent))
     
     def run(self, *args, **kwargs):
         for requirement in self._required:

@@ -132,7 +132,7 @@ class Parse:
                 out.append("".join(buf))
                 totalchars += len(buf)
                 buf = []
-                totalindent += indent
+                totalindent = indent
 
         out.append("".join(buf))
         return out

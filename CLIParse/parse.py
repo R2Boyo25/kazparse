@@ -119,21 +119,27 @@ class Parse:
         else:
             return self._getLongestFlag()+5
 
-    def _splitOnLongLine(self, text, length):
-        out = []
-        buf = []
+    def _splitOnLongLine(self, text, length, indent = 4):
+        out         = []
+        buf         = []
+        length     -= 2
+        totalindent = 0
+        totalchars  = 0
+
         for pos, char in enumerate(text):
             buf.append(char)
-            if pos > length:
+            if ( pos - totalchars > length - totalindent ) or ( char == "\n" ):
                 out.append("".join(buf))
+                totalchars += len(buf)
                 buf = []
+                totalindent = indent
 
         out.append("".join(buf))
         return out
 
     def _help(self, commandname = None):
         if self.before_text:
-            print((" "*4).join(self._splitOnLongLine(self.before_text, self._getScreenWidth())) + "\n")
+            print((" "*4).join(self._splitOnLongLine(self.before_text, self._getScreenWidth(), indent = 4)) + "\n")
 
         if commandname:
             if commandname in self._getCommands():
@@ -170,7 +176,7 @@ class Parse:
                     print(flag.pretty(indent = 4, longest_long = self._getLongest(), screen_width = self._getScreenWidth()).rstrip().rstrip("|").rstrip())
         
         if self.after_text:
-            print("\n" + (" "*4).join(self._splitOnLongLine(self.after_text, self._getScreenWidth())))
+            print("\n" + (" "*4).join(self._splitOnLongLine(self.after_text, self._getScreenWidth(), indent = 4)))
         sys.exit()
 
     def _getFlag(self, flagname):

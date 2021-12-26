@@ -46,8 +46,8 @@ class Flag:
     def pretty(self, indent = 8, longest_long = 2, screen_width = 10):
         longest_long = longest_long - 5
         if self._short and self._long:
-            return f"\n{' '*indent}".join(self._splitOnLongLine(f"{' ' * indent}-{self._short} --{self._long}{' ' * (longest_long - len(self._long))} | {self._help}".replace("\n", f"\n{' '*indent}"), screen_width, indent))
+            return f"\n{' '*(indent*2)}".join(self._splitOnLongLine(f"{' ' * indent}-{self._short} --{self._long}{' ' * (longest_long - len(self._long))} | {self._help}".replace("\n", f"\n{' '*indent}"), screen_width, indent*2))
         elif self._short:
-            return f"\n{' '*indent}".join(self._splitOnLongLine(f"{' ' * indent}-{self._short}{' ' * (longest_long+3)} | {self._help}".replace("\n", f"\n{' '*indent}"), screen_width, indent))
+            return f"\n{' '*(indent*2)}".join(self._splitOnLongLine(f"{' ' * indent}-{self._short}{' ' * (longest_long+3)} | {self._help}".replace("\n", f"\n{' '*indent}"), screen_width, indent*2))
         elif self._long:
-            return f"\n{' '*indent}".join(self._splitOnLongLine(f"{' ' * indent}   --{self._long}{' ' * (longest_long - len(self._long))} | {self._help}".replace("\n", f"\n{' '*indent}"), screen_width, indent))
+            return f"\n{' '*(indent*2)}".join(self._splitOnLongLine(f"{' ' * indent}   --{self._long}{' ' * (longest_long - len(self._long))} | {self._help}".replace("\n", f"\n{' '*indent}"), screen_width, indent*2))

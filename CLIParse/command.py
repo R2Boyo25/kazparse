@@ -33,7 +33,7 @@ class Command:
         return out
 
     def pretty(self, indent = 8, longest_command = 2, screen_width = 10):
-        return f"\n{' '*indent}".join(self._splitOnLongLine(f"{' ' * indent}{self._name}{' ' * (longest_command - len(self._name))} | {self._help}", screen_width, indent))
+        return f"\n{' '*(indent*2)}".join(self._splitOnLongLine(f"{' ' * indent}{self._name}{' ' * (longest_command - len(self._name))} | {self._help}", screen_width, indent*2))
     
     def run(self, *args, **kwargs):
         for requirement in self._required:

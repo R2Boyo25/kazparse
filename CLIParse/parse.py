@@ -137,9 +137,32 @@ class Parse:
         out.append("".join(buf))
         return out
 
+    def _usage(self):
+        print("Usage:")
+        name = self.name
+        indent = 3 * " "
+        if self._numOfShortArgs() > 0 and self._numOfLongArgs() > 0 and self._getNamedCommands() > 0:
+            usage = (indent, f"{name} [-{self._cluster()}]{' '.join(self._prettyLongArgs())} [command]")
+        elif self._numOfShortArgs() > 0 and self._numOfLongArgs() > 0:
+            usage = (indent, f"{name} [-{self._cluster()}]{' '.join(self._prettyLongArgs())}")
+        elif self._numOfShortArgs() > 0 and self._getNamedCommands() > 0:
+            usage = (indent, f"{name} [-{self._cluster()}] [command]")
+        elif self._numOfShortArgs() > 0 and self._getNamedCommands() > 0:
+            usage = (indent, f"{name} [-{self._cluster()}] [command]")
+        elif self._numOfLongArgs() > 0:
+            usage = (indent, f"{name} {' '.join(self._prettyLongArgs())}")
+        elif self._getNamedCommands() > 0:
+            usage = (indent, f"{name} [command]")
+        else:
+            usage = (indent, f"{name}")
+        
+        usage = " ".join(usage)
+        usage = ("\n" + ( " " * 4 )).join(self._splitOnLongLine(usage, self._getScreenWidth()))
+        print(usage)
+
     def _help(self, commandname = None):
         if self.before_text:
-            print((" "*4).join(self._splitOnLongLine(self.before_text, self._getScreenWidth(), indent = 4)) + "\n")
+            print(("\n" + (" "*4)).join(self._splitOnLongLine(self.before_text, self._getScreenWidth(), indent = 4)) + "\n")
 
         if commandname:
             if commandname in self._getCommands():
@@ -147,23 +170,7 @@ class Parse:
             else:
                 print(f"Command {commandname} does not exist")
         else:
-            print("Usage:")
-            name = self.name
-            indent = 3 * " "
-            if self._numOfShortArgs() > 0 and self._numOfLongArgs() > 0 and self._getNamedCommands() > 0:
-                print(indent, f"{name} [-{self._cluster()}]{' '.join(self._prettyLongArgs())} [command]")
-            elif self._numOfShortArgs() > 0 and self._numOfLongArgs() > 0:
-                print(indent, f"{name} [-{self._cluster()}]{' '.join(self._prettyLongArgs())}")
-            elif self._numOfShortArgs() > 0 and self._getNamedCommands() > 0:
-                print(indent, f"{name} [-{self._cluster()}] [command]")
-            elif self._numOfShortArgs() > 0 and self._getNamedCommands() > 0:
-                print(indent, f"{name} [-{self._cluster()}] [command]")
-            elif self._numOfLongArgs() > 0:
-                print(indent, f"{name} {' '.join(self._prettyLongArgs())}")
-            elif self._getNamedCommands() > 0:
-                print(indent, f"{name} [command]")
-            else:
-                print(indent, f"{name}")
+            self._usage()
                 
             if self._getNamedCommands() > 0:
                 print("Commands:")

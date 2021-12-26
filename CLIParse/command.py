@@ -23,7 +23,7 @@ class Command:
 
         for pos, char in enumerate(text):
             buf.append(char)
-            if pos - totalchars > length - totalindent:
+            if ( pos - totalchars > length - totalindent ) or ( char == "\n" ):
                 out.append("".join(buf))
                 totalchars += len(buf)
                 buf = []

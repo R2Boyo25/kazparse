@@ -233,7 +233,7 @@ class Parse:
                             if "=" in arg or args[pos+1].startswith("="):
                                 raise ArgumentError(f"Flag --{flag} is a toggle")
                         self.rflags[self._getFlag(flag)._name] = True
-            elif arg.startswith("-"):
+            elif arg.startswith("-") and arg[1] not in [str(i) for i in range(10)]:
                 arg = arg.lstrip("-")
                 if "=" in arg and arg[-1] != "=":
                     flag = arg.split("=")[0]

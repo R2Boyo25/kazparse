@@ -9,6 +9,7 @@ from .flags import Flags
 import sys
 import os
 import traceback
+from .loader import Loader
 
 class ArgumentError(Exception):
     pass
@@ -31,6 +32,13 @@ class Parse:
         self.ccommand = ""
         self.gotcommand = False
         self.pargs = []
+
+    def loadDir(self, directory = "commands"):
+        if type(directory) == list:
+            for _directory in directory:
+                Loader(self, _directory)
+        elif type(directory) == str:
+            Loader(self, directory)
 
     def flag(self, *args, **kwargs):
         self.flags.append(Flag(*args, **kwargs))

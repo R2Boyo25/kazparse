@@ -17,9 +17,9 @@ def loadPlugins(plugindir = "commands"):
 
     sys.path.insert(0, os.path.dirname(os.path.realpath(sys.argv[0])))
 
-    #plugindir = os.path.dirname(os.path.realpath(sys.argv[0])) + "/" + plugindir
+    plugindireeeeeeee = os.path.dirname(os.path.realpath(sys.argv[0])) + "/" + plugindir
 
-    pluginfiles = os.listdir(plugindir)
+    pluginfiles = os.listdir(plugindireeeeeeee)
 
     pluginfiles = [i for i in pluginfiles if os.path.isfile(f'{plugindir}/' + i)]
 

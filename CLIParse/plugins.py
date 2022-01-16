@@ -1,5 +1,5 @@
 from importlib import import_module
-import os
+import os, sys
 
 def getAttrs(plugin):
     filteredattrs = []
@@ -15,7 +15,7 @@ def getAttrs(plugin):
 def loadPlugins(plugindir = "commands"):
     plugins = []
 
-    plugindir = os.path.dirname(os.path.realpath(__file__)) + "/" + plugindir
+    plugindir = os.path.dirname(os.path.realpath(sys.argv[0])) + "/" + plugindir
 
     pluginfiles = os.listdir(plugindir)
 

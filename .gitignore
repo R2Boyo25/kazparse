@@ -1,8 +1,8 @@
 venv/*
 venv
-__pycache__
 t.py
 e.py
 *.egg-info
 build
 dist
+__pycache__

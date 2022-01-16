@@ -15,6 +15,8 @@ def getAttrs(plugin):
 def loadPlugins(plugindir = "commands"):
     plugins = []
 
+    plugindir = os.path.dirname(os.path.realpath(__file__)) + plugindir
+
     pluginfiles = os.listdir(plugindir)
 
     pluginfiles = [i for i in pluginfiles if os.path.isfile(f'{plugindir}/' + i)]

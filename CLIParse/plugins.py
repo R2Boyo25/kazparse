@@ -21,7 +21,7 @@ def loadPlugins(plugindir = "commands"):
 
     pluginfiles = os.listdir(plugindireeeeeeee)
 
-    pluginfiles = [i for i in pluginfiles if os.path.isfile(f'{plugindir}/' + i)]
+    pluginfiles = [i for i in pluginfiles if os.path.isfile(f'{plugindireeeeeeee}/' + i)]
 
     for pluginfile in pluginfiles:
 

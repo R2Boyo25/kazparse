@@ -20,10 +20,11 @@ def checkexc():
     return tb.tb_lineno in [313, 315] # will break on any change to the number of lines in this file
 
 class Parse:
-    def __init__(self, name = sys.argv[0], before = None, after = None):
+    def __init__(self, name: str = sys.argv[0], before: str = None, after: str = None, flagsAsArgumentsAfterCommand: bool = False):
         self.name = name
         self.before_text = before
         self.after_text = after
+        self.flagsAsArgumentsAfterCommand = flagsAsArgumentsAfterCommand
         self.flags = []
         self.rflags = {}
         self.commands = []
@@ -192,6 +193,7 @@ class Parse:
         
         if self.after_text:
             print("\n" + (" "*4).join(self._splitOnLongLine(self.after_text, self._getScreenWidth(), indent = 4)))
+
         sys.exit()
 
     def _getFlag(self, flagname):
@@ -207,98 +209,140 @@ class Parse:
     def handleArg(self, pos, args):
         try:
             arg = args[pos]
+
             if arg.lower() in ["-h", "--help", "help"]:
                 self._help()
+
+            if not self.inArg and self.gotcommand and self.flagsAsArgumentsAfterCommand:
+                self.pargs.append(arg)
+                return
+
             if arg.startswith("--"):
                 flag = arg.lstrip('--')
                 arg = arg.lstrip("--")
+
                 if "=" in flag and flag[-1] != "=":
                     flag = arg.split("=")[0]
+
                     if self._getFlag(flag)._type:
                         self.inArg = True
                         self.inArgName = arg.split("=")[-1]
+
                     else:
                         raise ArgumentError(f"Flag --{flag} is a toggle")
+
                 elif flag[-1] == "=":
                     flag = arg.rstrip("=")
+
                     if self._getFlag(flag)._type:
                         self.inArg = True
                         self.inArgName = flag
+
                     else:
                         raise ArgumentError(f"Flag --{flag} is not a toggle")
+                        
                 else:
                     flag = arg.rstrip("=")
+
                     if self._getFlag(flag)._type:
-                        #if "=" not in arg and not args[pos+1].startswith("="):
-                        #    raise ArgumentError(f"Flag --{flag} is not a toggle")
                         self.inArg = True
                         self.inArgName = flag
+
                     else:
+
                         if pos == len(args)-1:
+
                             if "=" in arg:
                                 raise ArgumentError(f"Flag --{flag} is a toggle")
+
                         else:
+
                             if "=" in arg or args[pos+1].startswith("="):
                                 raise ArgumentError(f"Flag --{flag} is a toggle")
+
                         self.rflags[self._getFlag(flag)._name] = True
+
             elif arg.startswith("-") and arg[1] not in [str(i) for i in range(10)]:
                 arg = arg.lstrip("-")
+
                 if "=" in arg and arg[-1] != "=":
                     flag = arg.split("=")[0]
+
                     if self._getFlag(flag)._type:
                         self.rflags[self._getFlag(flag)._name] = arg.split("=")[-1]
+
                     else:
                         raise ArgumentError(f"Flag -{flag} is a toggle")
+
                 elif arg[-1] == "=":
                     flag = arg.rstrip("=")
+
                     if self._getFlag(flag)._type:
                         self.inArg = True
                         self.inArgName = flag
+
                     else:
                         raise ArgumentError(f"Flag -{flag} is not a toggle")
+
                 elif len(arg) > 1:
+
                     for flag in arg:
+
                         if self._getFlag(flag)._type:
-                            #if not args[pos+1].startswith("="):
-                            #    raise ArgumentError(f"Flag -{flag} is not a toggle")
-                            #else:
                             self.inArg = True
                             self.inArgName = arg
+
                         else:
                             self.rflags[self._getFlag(flag)._name] = True
+
                 else:
                     flag = arg.rstrip("=")
+
                     if self._getFlag(flag)._type:
-                        #if "=" not in arg and not args[pos+1].startswith("="):
-                        #    raise ArgumentError(f"Flag -{flag} is not a toggle")
                         self.inArg = True
                         self.inArgName = flag
+
                     else:
                         if pos == len(args)-1:
+
                             if "=" in arg:
                                 raise ArgumentError(f"Flag --{flag} is a toggle")
+
                         else:
+
                             if "=" in arg or args[pos+1].startswith("="):
                                 raise ArgumentError(f"Flag --{flag} is a toggle")
+
                         self.rflags[self._getFlag(flag)._name] = True
+
             else:
+
                 if not self.inArg:
+
                     if self.gotcommand:
                         self.pargs.append(arg)
+
                     else:
+
                         if arg in self._getCommands():
                             self.ccommand = arg
                             self.gotcommand = True
+
                         else:
+
                             if not ("" in self._getCommands()):
                                 raise ArgumentError(f"Invalid command {arg}")
+
                             else:
                                 self.pargs.append(arg)
                                 self.gotcommand = True
+
                 else:
+
                     if arg.strip() != "=":
                         self.inArg = False
                         self.rflags[self._getFlag(self.inArgName)._name] = self._getFlag(self.inArgName).parse(arg.lstrip("=").strip())
+
         except ArgumentError as e:
             print(e)
             self._help()

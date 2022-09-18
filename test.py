@@ -1,6 +1,6 @@
 import CLIParse
 
-p = CLIParse.Parse("test", before = "Test Program V1.0", after = "This is the after text")
+p = CLIParse.Parse("test", before = "Test Program V1.0", after = "This is the after text", flagsAsArgumentsAfterCommand = True)
 
 p.flag("b", short = "b", long = "brown", help = "Whether to be brown")
 p.flag("p", short = "p", long = "purple", help = "Whether to be purple")
@@ -12,7 +12,7 @@ def printArgs(flags, *args):
     print(flags, *args)
 
 @p.command()
-def defaultCommand(flags):
+def defaultCommand(flags, *args):
     print(flags, *args)
 
 p.run()

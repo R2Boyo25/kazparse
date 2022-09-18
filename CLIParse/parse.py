@@ -210,12 +210,12 @@ class Parse:
         try:
             arg = args[pos]
 
-            if arg.lower() in ["-h", "--help", "help"]:
-                self._help()
-
             if not self.inArg and self.gotcommand and self.flagsAsArgumentsAfterCommand:
                 self.pargs.append(arg)
                 return
+
+            if arg.lower() in ["-h", "--help", "help"]:
+                self._help()
 
             if arg.startswith("--"):
                 flag = arg.lstrip('--')

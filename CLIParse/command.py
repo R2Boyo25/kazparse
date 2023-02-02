@@ -22,7 +22,9 @@ class Command:
         totalchars  = 0
 
         for pos, char in enumerate(text):
-            buf.append(char)
+            if char != "\n":
+                buf.append(char)
+                
             if ( pos - totalchars > length - totalindent ) or ( char == "\n" ):
                 out.append("".join(buf))
                 totalchars += len(buf)
@@ -33,7 +35,9 @@ class Command:
         return out
 
     def pretty(self, indent = 8, longest_command = 2, screen_width = 10):
-        return f"\n{' '*(indent*2)}".join(self._splitOnLongLine(f"{' ' * indent}{self._name}{' ' * (longest_command - len(self._name))} | {self._help}", screen_width, indent*2))
+        continuing_indent = indent + longest_command + 3
+        
+        return f"\n{' '*(continuing_indent)}".join(self._splitOnLongLine(f"{' ' * indent}{self._name}{' ' * (longest_command - len(self._name))} | {self._help}", screen_width, continuing_indent))
     
     def run(self, *args, **kwargs):
         for requirement in self._required:

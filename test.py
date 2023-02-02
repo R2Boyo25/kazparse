@@ -1,14 +1,14 @@
 import CLIParse
 
-p = CLIParse.Parse("test", before = "Test Program V1.0", after = "This is the after text", flagsAsArgumentsAfterCommand = True)
+p = CLIParse.Parse("test", before = "Test Program V1.0\nmultiline before", after = "This is the after text\nnewline", flagsAsArgumentsAfterCommand = True)
 
-p.flag("b", short = "b", long = "brown", help = "Whether to be brown")
+p.flag("b", short = "b", long = "brown", help = "Whether to be brown\nnewline")
 p.flag("p", short = "p", long = "purple", help = "Whether to be purple")
 p.flag("c", short = "c", long = "color", help = "Color to use", type = str)
 
 @p.command("pargs")
 def printArgs(flags, *args):
-    "Print arguments"
+    "Print arguments\nmultilinehelp\nanother line"
     print(flags, *args)
 
 @p.command()

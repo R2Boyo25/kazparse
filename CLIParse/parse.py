@@ -20,7 +20,11 @@ def checkexc():
     return tb.tb_lineno in [313, 315] # will break on any change to the number of lines in this file
 
 class Parse:
-    def __init__(self, name: str = sys.argv[0], before: str = None, after: str = None, flagsAsArgumentsAfterCommand: bool = False):
+    def __init__(self,
+                 name: str = sys.argv[0],
+                 before: str = None,
+                 after: str = None,
+                 flagsAsArgumentsAfterCommand: bool = False):
         self.name = name
         self.before_text = before
         self.after_text = after
@@ -46,7 +50,12 @@ class Parse:
     
     def command(self, commandname = "", required = [], hidden = False):
         def decorator_command(function):
-            self.commands.append(Command(commandname, function, args = function.__code__.co_varnames, help = function.__doc__, required = required, hidden = hidden))
+            self.commands.append(Command(commandname,
+                                         function,
+                                         args = function.__code__.co_varnames,
+                                         help = function.__doc__,
+                                         required = required,
+                                         hidden = hidden))
         return decorator_command
     
     def _getLongestFlag(self):
@@ -136,8 +145,10 @@ class Parse:
         totalchars  = 0
 
         for pos, char in enumerate(text):
-            buf.append(char)
-            if ( pos - totalchars > length - totalindent ) or ( char == "\n" ):
+            if char != "\n":
+                buf.append(char)
+                
+            if (pos - totalchars > length - totalindent) or (char == "\n"):
                 out.append("".join(buf))
                 totalchars += len(buf)
                 buf = []
@@ -166,12 +177,15 @@ class Parse:
             usage = (indent, f"{name}")
         
         usage = " ".join(usage)
-        usage = ("\n" + ( " " * 4 )).join(self._splitOnLongLine(usage, self._getScreenWidth()))
+        usage = ("\n" + " " * 4).join(self._splitOnLongLine(usage, self._getScreenWidth()))
         print(usage)
 
     def _help(self, commandname = None):
         if self.before_text:
-            print(("\n" + (" "*4)).join(self._splitOnLongLine(self.before_text, self._getScreenWidth(), indent = 4)) + "\n")
+            print(("\n" + " " * 4)
+                  .join(self._splitOnLongLine(self.before_text,
+                                              self._getScreenWidth(),
+                                              indent = 8 + self._getLongest())) + "\n")
 
         if commandname:
             if commandname in self._getCommands():
@@ -185,14 +199,23 @@ class Parse:
                 print("Commands:")
                 for command in self.commands:
                     if not command.hidden:
-                        print(command.pretty(indent = 4, longest_command = self._getLongest(), screen_width = self._getScreenWidth()).rstrip().rstrip("|").rstrip())
+                        print(command.pretty(indent = 8,
+                                             longest_command = self._getLongest(),
+                                             screen_width = self._getScreenWidth()).rstrip().rstrip("|").rstrip())
             if len(self.flags) > 0:
                 print("Flags:")
                 for flag in self.flags:
-                    print(flag.pretty(indent = 4, longest_long = self._getLongest(), screen_width = self._getScreenWidth()).rstrip().rstrip("|").rstrip())
+                    print(flag.pretty(indent = 8,
+                                      longest_long = self._getLongest(),
+                                      screen_width = self._getScreenWidth())
+                          .rstrip()
+                          .rstrip("|")
+                          .rstrip())
         
         if self.after_text:
-            print("\n" + (" "*4).join(self._splitOnLongLine(self.after_text, self._getScreenWidth(), indent = 4)))
+            print("\n" + ("\n" + " " * 4).join(self._splitOnLongLine(self.after_text,
+                                                              self._getScreenWidth(),
+                                                              indent = 4)))
 
         sys.exit()
 
@@ -374,9 +397,12 @@ class Parse:
         if self.ccommand in self._getCommands():
             try:
                 if extras:
-                    self._getCommand(self.ccommand).run(Flags(self.rflags), extras, *self.pargs)
+                    self._getCommand(self.ccommand).run(Flags(self.rflags),
+                                                        extras,
+                                                        *self.pargs)
                 else:
-                    self._getCommand(self.ccommand).run(Flags(self.rflags), *self.pargs)
+                    self._getCommand(self.ccommand).run(Flags(self.rflags),
+                                                        *self.pargs)
             except FlagError as e:
                 print(e)
                 self._help()

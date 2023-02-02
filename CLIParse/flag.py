@@ -33,7 +33,9 @@ class Flag:
         totalchars  = 0
 
         for pos, char in enumerate(text):
-            buf.append(char)
+            if char != "\n":
+                buf.append(char)
+                
             if ( pos - totalchars > length - totalindent ) or ( char == "\n" ):
                 out.append("".join(buf))
                 totalchars += len(buf)
@@ -45,9 +47,12 @@ class Flag:
 
     def pretty(self, indent = 8, longest_long = 2, screen_width = 10):
         longest_long = longest_long - 5
+
+        continuing_indent = indent + longest_long
+        
         if self._short and self._long:
-            return f"\n{' '*(indent*2)}".join(self._splitOnLongLine(f"{' ' * indent}-{self._short} --{self._long}{' ' * (longest_long - len(self._long))} | {self._help}".replace("\n", f"\n{' '*indent}"), screen_width, indent*2))
+            return f"\n{' '*(continuing_indent)}".join(self._splitOnLongLine(f"{' ' * indent}-{self._short} --{self._long}{' ' * (longest_long - len(self._long))} | {self._help}".replace("\n", f"\n{' '*indent}"), screen_width, continuing_indent))
         elif self._short:
-            return f"\n{' '*(indent*2)}".join(self._splitOnLongLine(f"{' ' * indent}-{self._short}{' ' * (longest_long+3)} | {self._help}".replace("\n", f"\n{' '*indent}"), screen_width, indent*2))
+            return f"\n{' '*(continuing_indent)}".join(self._splitOnLongLine(f"{' ' * indent}-{self._short}{' ' * (longest_long+3)} | {self._help}".replace("\n", f"\n{' '*indent}"), screen_width, continuing_indent))
         elif self._long:
-            return f"\n{' '*(indent*2)}".join(self._splitOnLongLine(f"{' ' * indent}   --{self._long}{' ' * (longest_long - len(self._long))} | {self._help}".replace("\n", f"\n{' '*indent}"), screen_width, indent*2))
+            return f"\n{' '*(continuing_indent)}".join(self._splitOnLongLine(f"{' ' * indent}   --{self._long}{' ' * (longest_long - len(self._long))} | {self._help}".replace("\n", f"\n{' '*indent}"), screen_width, continuing_indent))

@@ -56,3 +56,11 @@ class Flag:
             return f"\n{' '*(continuing_indent)}".join(self._splitOnLongLine(f"{' ' * indent}-{self._short}{' ' * (longest_long+3)} | {self._help}".replace("\n", f"\n{' '*indent}"), screen_width, continuing_indent))
         elif self._long:
             return f"\n{' '*(continuing_indent)}".join(self._splitOnLongLine(f"{' ' * indent}   --{self._long}{' ' * (longest_long - len(self._long))} | {self._help}".replace("\n", f"\n{' '*indent}"), screen_width, continuing_indent))
+
+    def __lt__(self, other):
+        if self._short and other._short:
+            return self._short < other._short
+        elif self._long and other._long:
+            return self._long < other._long
+        else:
+            return self._name < other._name

@@ -14,11 +14,6 @@ from .loader import Loader
 class ArgumentError(Exception):
     pass
 
-def checkexc():
-    tb = sys.exc_info()[-1]
-
-    return tb.tb_lineno in [313, 315] # will break on any change to the number of lines in this file
-
 class Parse:
     def __init__(self,
                  name: str = sys.argv[0],
@@ -47,6 +42,7 @@ class Parse:
 
     def flag(self, *args, **kwargs):
         self.flags.append(Flag(*args, **kwargs))
+        self.flags.sort()
     
     def command(self, commandname = "", required = [], hidden = False):
         def decorator_command(function):
@@ -56,6 +52,7 @@ class Parse:
                                          help = function.__doc__,
                                          required = required,
                                          hidden = hidden))
+        self.commands.sort()
         return decorator_command
     
     def _getLongestFlag(self):
@@ -274,12 +271,10 @@ class Parse:
                     else:
 
                         if pos == len(args)-1:
-
                             if "=" in arg:
                                 raise ArgumentError(f"Flag --{flag} is a toggle")
 
                         else:
-
                             if "=" in arg or args[pos+1].startswith("="):
                                 raise ArgumentError(f"Flag --{flag} is a toggle")
 
@@ -308,9 +303,7 @@ class Parse:
                         raise ArgumentError(f"Flag -{flag} is not a toggle")
 
                 elif len(arg) > 1:
-
                     for flag in arg:
-
                         if self._getFlag(flag)._type:
                             self.inArg = True
                             self.inArgName = arg
@@ -327,32 +320,26 @@ class Parse:
 
                     else:
                         if pos == len(args)-1:
-
                             if "=" in arg:
                                 raise ArgumentError(f"Flag --{flag} is a toggle")
 
                         else:
-
                             if "=" in arg or args[pos+1].startswith("="):
                                 raise ArgumentError(f"Flag --{flag} is a toggle")
 
                         self.rflags[self._getFlag(flag)._name] = True
 
             else:
-
                 if not self.inArg:
-
                     if self.gotcommand:
                         self.pargs.append(arg)
 
                     else:
-
                         if arg in self._getCommands():
                             self.ccommand = arg
                             self.gotcommand = True
 
                         else:
-
                             if not ("" in self._getCommands()):
                                 raise ArgumentError(f"Invalid command {arg}")
 
@@ -361,7 +348,6 @@ class Parse:
                                 self.gotcommand = True
 
                 else:
-
                     if arg.strip() != "=":
                         self.inArg = False
                         self.rflags[self._getFlag(self.inArgName)._name] = self._getFlag(self.inArgName).parse(arg.lstrip("=").strip())
@@ -406,12 +392,6 @@ class Parse:
             except FlagError as e:
                 print(e)
                 self._help()
-            #except TypeError as e:
-            #    if checkexc():
-            #        print(f"Command {self.ccommand} missing required argument(s) {str(e).split('required positional argument:')[-1].split('required positional arguments:')[-1].strip()}")
-            #        self._help()
-            #    else:
-            #        raise e # For any devs that see this from their program, sorry, have to do this for handling missing non-optional arguments
         else:
             print("Specify a subcommand")
             self._help()

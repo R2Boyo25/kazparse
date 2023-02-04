@@ -49,3 +49,8 @@ class Command:
 
         self._func(*args, **kwargs)
         
+    def __lt__(self, other):
+        if self._name and other._name:
+            return self._name > other._name
+        else:
+            return False

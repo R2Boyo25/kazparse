@@ -11,109 +11,122 @@ import os
 import traceback
 from .loader import Loader
 
+from typing import Callable, Any, Sequence
+
+
 class ArgumentError(Exception):
     pass
 
+
 class Parse:
-    def __init__(self,
-                 name: str = sys.argv[0],
-                 before: str = None,
-                 after: str = None,
-                 flagsAsArgumentsAfterCommand: bool = False):
+    def __init__(
+        self,
+        name: str = sys.argv[0],
+        before: None | str = None,
+        after: None | str = None,
+        flagsAsArgumentsAfterCommand: bool = False,
+    ):
         self.name = name
         self.before_text = before
         self.after_text = after
         self.flagsAsArgumentsAfterCommand = flagsAsArgumentsAfterCommand
-        self.flags = []
-        self.rflags = {}
-        self.commands = []
+        self.flags: list[Flag] = []
+        self.rflags: dict[str, Any] = {}
+        self.commands: list[Command] = []
         self.inArg = False
         self.inArgName = ""
         self.ccommand = ""
         self.gotcommand = False
-        self.pargs = []
+        self.pargs: list[str] = []
 
-    def loadDir(self, directory = "commands"):
-        if type(directory) == list:
+    def loadDir(self, directory: str = "commands") -> None:
+        if type(directory) == list:  # type: ignore
             for _directory in directory:
                 Loader(self, _directory)
         elif type(directory) == str:
             Loader(self, directory)
 
-    def flag(self, *args, **kwargs):
+    def flag(self, *args: Any, **kwargs: Any) -> None:
         self.flags.append(Flag(*args, **kwargs))
         self.flags.sort()
-    
-    def command(self, commandname = "", required = [], hidden = False):
-        def decorator_command(function):
-            self.commands.append(Command(commandname,
-                                         function,
-                                         args = function.__code__.co_varnames,
-                                         help = function.__doc__,
-                                         required = required,
-                                         hidden = hidden))
+
+    def command(
+        self, commandname: str = "", required: list[str] = [], hidden: bool = False
+    ) -> Callable[[Callable[[Flags, Any], None]], None]:
+        def decorator_command(function: Callable[[Flags, Any], None]) -> None:
+            self.commands.append(
+                Command(
+                    commandname,
+                    function,
+                    args=list(function.__code__.co_varnames),
+                    help=function.__doc__ if function.__doc__ else "",
+                    required=required,
+                    hidden=hidden,
+                )
+            )
+
         self.commands.sort()
         return decorator_command
-    
-    def _getLongestFlag(self):
+
+    def _getLongestFlag(self) -> int:
         longest = 0
         for flag in self.flags:
             if flag._long:
                 if len(flag._long) > longest:
                     longest = len(flag._long)
-        
+
         return longest
-    
-    def _getLongestCommand(self):
+
+    def _getLongestCommand(self) -> int:
         longest = 0
         for command in self.commands:
             if len(command._name) > longest:
                 longest = len(command._name)
-        
+
         return longest
-    
-    def _getCommands(self):
+
+    def _getCommands(self) -> list[str]:
         coms = []
         for command in self.commands:
             coms.append(command._name)
-        
+
         return coms
-    
-    def _getCommand(self, commandname):
+
+    def _getCommand(self, commandname: str) -> Command | None:
         for command in self.commands:
             if command._name == commandname:
                 return command
         else:
             return None
 
-    def _getScreenWidth(self):
+    def _getScreenWidth(self) -> int:
         return os.get_terminal_size()[0]
 
-    def _cluster(self):
+    def _cluster(self) -> str:
         out = ""
         for flag in self.flags:
             if flag._short:
                 out += flag._short
 
         return out
-    
-    def _numOfShortArgs(self):
+
+    def _numOfShortArgs(self) -> int:
         out = 0
         for flag in self.flags:
             if flag._short:
                 out += 1
 
         return out
-    
-    def _numOfLongArgs(self):
+
+    def _numOfLongArgs(self) -> int:
         out = 0
         for flag in self.flags:
             if flag._long:
                 out += 1
 
         return out
-    
-    def _prettyLongArgs(self):
+
+    def _prettyLongArgs(self) -> list[str]:
         out = [""]
         for flag in self.flags:
             if flag._long:
@@ -121,30 +134,30 @@ class Parse:
 
         return out
 
-    def _getNamedCommands(self):
+    def _getNamedCommands(self) -> int:
         out = 0
         for command in self.commands:
             if command._name != "" and not command.hidden:
                 out += 1
         return out
 
-    def _getLongest(self):
-        if self._getLongestCommand() > self._getLongestFlag()+5:
+    def _getLongest(self) -> int:
+        if self._getLongestCommand() > self._getLongestFlag() + 5:
             return self._getLongestCommand()
         else:
-            return self._getLongestFlag()+5
+            return self._getLongestFlag() + 5
 
-    def _splitOnLongLine(self, text, length, indent = 4):
-        out         = []
-        buf         = []
-        length     -= 2
+    def _splitOnLongLine(self, text: str, length: int, indent: int = 4) -> list[str]:
+        out = []
+        buf = []
+        length -= 2
         totalindent = 0
-        totalchars  = 0
+        totalchars = 0
 
         for pos, char in enumerate(text):
             if char != "\n":
                 buf.append(char)
-                
+
             if (pos - totalchars > length - totalindent) or (char == "\n"):
                 out.append("".join(buf))
                 totalchars += len(buf)
@@ -154,14 +167,24 @@ class Parse:
         out.append("".join(buf))
         return out
 
-    def _usage(self):
+    def _usage(self) -> None:
         print("Usage:")
         name = self.name
         indent = 3 * " "
-        if self._numOfShortArgs() > 0 and self._numOfLongArgs() > 0 and self._getNamedCommands() > 0:
-            usage = (indent, f"{name} [-{self._cluster()}]{' '.join(self._prettyLongArgs())} [command]")
+        if (
+            self._numOfShortArgs() > 0
+            and self._numOfLongArgs() > 0
+            and self._getNamedCommands() > 0
+        ):
+            usage = (
+                indent,
+                f"{name} [-{self._cluster()}]{' '.join(self._prettyLongArgs())} [command]",
+            )
         elif self._numOfShortArgs() > 0 and self._numOfLongArgs() > 0:
-            usage = (indent, f"{name} [-{self._cluster()}]{' '.join(self._prettyLongArgs())}")
+            usage = (
+                indent,
+                f"{name} [-{self._cluster()}]{' '.join(self._prettyLongArgs())}",
+            )
         elif self._numOfShortArgs() > 0 and self._getNamedCommands() > 0:
             usage = (indent, f"{name} [-{self._cluster()}] [command]")
         elif self._numOfShortArgs() > 0 and self._getNamedCommands() > 0:
@@ -172,51 +195,75 @@ class Parse:
             usage = (indent, f"{name} [command]")
         else:
             usage = (indent, f"{name}")
-        
-        usage = " ".join(usage)
-        usage = ("\n" + " " * 4).join(self._splitOnLongLine(usage, self._getScreenWidth()))
-        print(usage)
 
-    def _help(self, commandname = None):
+        joined_usage = " ".join(usage)
+        joined_usage = ("\n" + " " * 4).join(
+            self._splitOnLongLine(joined_usage, self._getScreenWidth())
+        )
+        print(joined_usage)
+
+    def _help(self, commandname: str | None = None) -> None:
         if self.before_text:
-            print(("\n" + " " * 4)
-                  .join(self._splitOnLongLine(self.before_text,
-                                              self._getScreenWidth(),
-                                              indent = 8 + self._getLongest())) + "\n")
+            print(
+                ("\n" + " " * 4).join(
+                    self._splitOnLongLine(
+                        self.before_text,
+                        self._getScreenWidth(),
+                        indent=8 + self._getLongest(),
+                    )
+                )
+                + "\n"
+            )
 
         if commandname:
-            if commandname in self._getCommands():
-                print(self._getCommand(commandname)._help)
+            if (command := self._getCommand(commandname)) is not None:
+                print(command._help)
             else:
                 print(f"Command {commandname} does not exist")
         else:
             self._usage()
-                
+
             if self._getNamedCommands() > 0:
                 print("Commands:")
                 for command in self.commands:
                     if not command.hidden:
-                        print(command.pretty(indent = 8,
-                                             longest_command = self._getLongest(),
-                                             screen_width = self._getScreenWidth()).rstrip().rstrip("|").rstrip())
+                        print(
+                            command.pretty(
+                                indent=8,
+                                longest_command=self._getLongest(),
+                                screen_width=self._getScreenWidth(),
+                            )
+                            .rstrip()
+                            .rstrip("|")
+                            .rstrip()
+                        )
             if len(self.flags) > 0:
                 print("Flags:")
                 for flag in self.flags:
-                    print(flag.pretty(indent = 8,
-                                      longest_long = self._getLongest(),
-                                      screen_width = self._getScreenWidth())
-                          .rstrip()
-                          .rstrip("|")
-                          .rstrip())
-        
+                    print(
+                        flag.pretty(
+                            indent=8,
+                            longest_long=self._getLongest(),
+                            screen_width=self._getScreenWidth(),
+                        )
+                        .rstrip()
+                        .rstrip("|")
+                        .rstrip()
+                    )
+
         if self.after_text:
-            print("\n" + ("\n" + " " * 4).join(self._splitOnLongLine(self.after_text,
-                                                              self._getScreenWidth(),
-                                                              indent = 4)))
+            print(
+                "\n"
+                + ("\n" + " " * 4).join(
+                    self._splitOnLongLine(
+                        self.after_text, self._getScreenWidth(), indent=4
+                    )
+                )
+            )
 
         sys.exit()
 
-    def _getFlag(self, flagname):
+    def _getFlag(self, flagname: str) -> Flag:
         for flag in self.flags:
             if flag._short == flagname or flag._long == flagname:
                 return flag
@@ -226,7 +273,7 @@ class Parse:
             else:
                 raise ArgumentError(f"Invalid flag --{flagname}")
 
-    def handleArg(self, pos, args):
+    def handleArg(self, pos: int, args: list[str]) -> None:
         try:
             arg = args[pos]
 
@@ -238,7 +285,7 @@ class Parse:
                 self._help()
 
             if arg.startswith("--"):
-                flag = arg.lstrip('--')
+                flag = arg.lstrip("--")
                 arg = arg.lstrip("--")
 
                 if "=" in flag and flag[-1] != "=":
@@ -260,7 +307,7 @@ class Parse:
 
                     else:
                         raise ArgumentError(f"Flag --{flag} is not a toggle")
-                        
+
                 else:
                     flag = arg.rstrip("=")
 
@@ -269,13 +316,12 @@ class Parse:
                         self.inArgName = flag
 
                     else:
-
-                        if pos == len(args)-1:
+                        if pos == len(args) - 1:
                             if "=" in arg:
                                 raise ArgumentError(f"Flag --{flag} is a toggle")
 
                         else:
-                            if "=" in arg or args[pos+1].startswith("="):
+                            if "=" in arg or args[pos + 1].startswith("="):
                                 raise ArgumentError(f"Flag --{flag} is a toggle")
 
                         self.rflags[self._getFlag(flag)._name] = True
@@ -319,12 +365,12 @@ class Parse:
                         self.inArgName = flag
 
                     else:
-                        if pos == len(args)-1:
+                        if pos == len(args) - 1:
                             if "=" in arg:
                                 raise ArgumentError(f"Flag --{flag} is a toggle")
 
                         else:
-                            if "=" in arg or args[pos+1].startswith("="):
+                            if "=" in arg or args[pos + 1].startswith("="):
                                 raise ArgumentError(f"Flag --{flag} is a toggle")
 
                         self.rflags[self._getFlag(flag)._name] = True
@@ -350,13 +396,17 @@ class Parse:
                 else:
                     if arg.strip() != "=":
                         self.inArg = False
-                        self.rflags[self._getFlag(self.inArgName)._name] = self._getFlag(self.inArgName).parse(arg.lstrip("=").strip())
+                        self.rflags[
+                            self._getFlag(self.inArgName)._name
+                        ] = self._getFlag(self.inArgName).parse(arg.lstrip("=").strip())
 
         except ArgumentError as e:
             print(e)
             self._help()
 
-    def run(self, args = None, extras = None):
+    def run(
+        self, args: Sequence[str] | None = None, extras: Any | None = None
+    ) -> None:
         if not args:
             args = sys.argv[1:]
 
@@ -368,7 +418,7 @@ class Parse:
 
         if len(args) == 0 and (not "" in self._getCommands()):
             self._help()
-        
+
         for obj in enumerate(args):
             pos = obj[0]
             self.handleArg(pos, args)
@@ -380,15 +430,12 @@ class Parse:
                 print(f"Flag -{self.inArgName} is not a toggle")
             self._help()
 
-        if self.ccommand in self._getCommands():
+        if (command := self._getCommand(self.ccommand)) is not None:
             try:
                 if extras:
-                    self._getCommand(self.ccommand).run(Flags(self.rflags),
-                                                        extras,
-                                                        *self.pargs)
+                    command.run(Flags(self.rflags), extras, *self.pargs)
                 else:
-                    self._getCommand(self.ccommand).run(Flags(self.rflags),
-                                                        *self.pargs)
+                    command.run(Flags(self.rflags), *self.pargs)
             except FlagError as e:
                 print(e)
                 self._help()

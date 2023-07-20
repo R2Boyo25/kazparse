@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "kazparse"
+version = "0.1.3"
+description = "Kazani's Argument Parser"
+authors = ["Kazani"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.4.1"
+black = "^23.7.0"
+ruff = "^0.0.278"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -6,3 +6,6 @@ e.py
 build
 dist
 __pycache__
+*~
+\#*\#
+poetry.lock

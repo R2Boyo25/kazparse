@@ -1,2 +1,2 @@
 #!/bin/bash
-poetry build
+pip3 install .
